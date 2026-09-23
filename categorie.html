@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NovaMarket — produits par catégorie. Commande simple sur WhatsApp.">
+  <title>Catégorie — NovaMarket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+
+  <!-- Open Graph (aperçu des liens partagés, ex. sur WhatsApp) -->
+  <!-- TODO: après mise en ligne, utiliser une URL absolue pour og:image (https://votre-domaine/images/og-image.jpg) et ajouter le fichier (1200 × 630 px). -->
+  <meta property="og:site_name" content="NovaMarket">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Catégorie — NovaMarket">
+  <meta property="og:description" content="NovaMarket — produits par catégorie. Commande simple sur WhatsApp.">
+  <meta property="og:image" content="images/og-image.jpg">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <div class="announcement">
+    <div><span aria-hidden="true">🚚</span> Livraison disponible</div>
+    <div><span aria-hidden="true">📱</span> Commande simple sur WhatsApp</div>
+    <div><span aria-hidden="true">✓</span> Sélection maison & cuisine</div>
+  </div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="NovaMarket accueil">
+        <span class="brand-mark">N</span>
+        <span>
+          <strong>NOVAMARKET</strong>
+          <small>MAISON • CUISINE • LIFESTYLE</small>
+        </span>
+      </a>
+
+      <button type="button" class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-controls="mainNav" aria-expanded="false">☰</button>
+
+      <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
+        <a href="index.html">Accueil</a>
+        <a class="active" href="index.html#categories">Catégories</a>
+        <a href="produits.html">Produits</a>
+        <a href="index.html#inspiration">Inspiration</a>
+        <a href="index.html#apropos">À propos</a>
+        <a href="index.html#contact">Contact</a>
+        <a class="nav-whatsapp" data-whatsapp-link target="_blank" rel="noopener">Commander sur WhatsApp</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="icon-btn" id="searchBtn" aria-label="Rechercher" aria-haspopup="dialog">⌕</button>
+        <a class="whatsapp-btn" data-whatsapp-link target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenu" tabindex="-1">
+    <!-- Bannière générée par categorie.js à partir de CATEGORIES (data/products.js) -->
+    <section class="category-hero" id="categoryHero">
+      <div class="category-hero-image" id="categoryHeroImage"></div>
+      <div class="container category-hero-content">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane" id="categoryBreadcrumb">
+          <ol><li><a href="index.html">Accueil</a></li></ol>
+        </nav>
+        <span class="eyebrow" id="categoryEyebrow">CATÉGORIE</span>
+        <h1 id="categoryTitle">Catégorie</h1>
+        <p id="categoryDescription"></p>
+        <div class="hero-actions" id="categoryActions"></div>
+      </div>
+    </section>
+
+    <section class="section catalogue-section" id="categoryProducts">
+      <div class="container">
+        <nav class="category-chips" id="categoryChips" aria-label="Catégories"></nav>
+
+        <div class="category-toolbar" id="categoryToolbar">
+          <p class="catalogue-count" id="categoryCount" aria-live="polite"></p>
+          <label class="sort-label">
+            <span>Trier par</span>
+            <select id="categorySort">
+              <option value="default">Pertinence</option>
+              <option value="price-asc">Prix croissant</option>
+              <option value="price-desc">Prix décroissant</option>
+              <option value="name">Nom (A → Z)</option>
+            </select>
+          </label>
+        </div>
+
+        <h2 class="sr-only">Produits de la catégorie</h2>
+        <div class="product-grid" id="categoryGrid"></div>
+        <div class="catalogue-empty" id="categoryEmpty" hidden>
+          <p>Aucun produit dans cette catégorie pour le moment.</p>
+          <a class="btn btn-dark" href="produits.html">Voir tous les produits <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact-section">
+      <div class="container contact-box">
+        <div>
+          <span class="eyebrow">UNE QUESTION ?</span>
+          <h2>Besoin d'un conseil ?</h2>
+          <p>Disponibilité, livraison, choix du bon produit : écrivez-nous directement sur WhatsApp.</p>
+        </div>
+        <a class="btn btn-dark" id="categoryContactWhatsapp" data-whatsapp-link target="_blank" rel="noopener">Nous contacter sur WhatsApp →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <a class="brand footer-brand" href="index.html">
+          <span class="brand-mark">N</span>
+          <span><strong>NOVAMARKET</strong><small>MAISON • CUISINE • LIFESTYLE</small></span>
+        </a>
+        <p>Des produits pratiques pour une maison plus simple et plus agréable.</p>
+      </div>
+      <div>
+        <h2 class="footer-title">Navigation</h2>
+        <a href="index.html">Accueil</a>
+        <a href="index.html#categories">Catégories</a>
+        <a href="produits.html">Produits</a>
+        <a href="index.html#inspiration">Inspiration</a>
+      </div>
+      <div>
+        <h2 class="footer-title">Informations</h2>
+        <a href="index.html#apropos">À propos</a>
+        <a href="index.html#contact">Contact</a>
+        <a class="is-pending" title="Page bientôt disponible">Livraison</a>
+        <a class="is-pending" title="Page bientôt disponible">FAQ</a>
+      </div>
+      <div>
+        <h2 class="footer-title">Nous suivre</h2>
+        <a data-social="instagram">Instagram</a>
+        <a data-social="facebook">Facebook</a>
+        <a data-social="tiktok">TikTok</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year"></span> NovaMarket. Tous droits réservés.</span>
+      <span>Maison • Cuisine • Lifestyle</span>
+    </div>
+  </footer>
+
+  <div class="search-modal" id="searchModal">
+    <div class="search-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <button type="button" class="close-search" id="closeSearch" aria-label="Fermer la recherche">×</button>
+      <span class="eyebrow">RECHERCHE</span>
+      <h2 id="searchTitle">Que recherchez-vous ?</h2>
+      <label class="sr-only" for="searchInput">Rechercher un produit</label>
+      <input type="search" id="searchInput" placeholder="Ex. air fryer, rangement, cuisine..." autocomplete="off">
+      <div id="searchResults" class="search-results" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script src="data/products.js"></script>
+  <script src="script.js"></script>
+  <script src="categorie.js"></script>
+</body>
+</html>

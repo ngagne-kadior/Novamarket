@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon NovaMarket : reprend le logo "N" du site (carré incliné, couleur encre #171915) -->
+  <rect width="64" height="64" rx="12" fill="#f5f2e9"/>
+  <g transform="rotate(-5 32 32)">
+    <rect x="12" y="12" width="40" height="40" fill="none" stroke="#171915" stroke-width="2.5"/>
+    <text x="32" y="43" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="30" fill="#171915">N</text>
+  </g>
+</svg>
