@@ -12,13 +12,15 @@
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
 
   <!-- Open Graph (aperçu des liens partagés, ex. sur WhatsApp) -->
-  <!-- TODO: après mise en ligne, utiliser une URL absolue pour og:image (https://votre-domaine/images/og-image.jpg) et ajouter le fichier (1200 × 630 px). -->
+  <!-- og:image : URL absolue obligatoire (domaine Vercel actuel) — à modifier si le site change de domaine. Image : images/og-image.jpg (1200 × 630 px). -->
   <meta property="og:site_name" content="NovaMarket">
   <meta property="og:locale" content="fr_FR">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Produit — NovaMarket">
   <meta property="og:description" content="NovaMarket — fiche produit. Commande simple sur WhatsApp.">
-  <meta property="og:image" content="images/og-image.jpg">
+  <meta property="og:image" content="https://novamarket-plum.vercel.app/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -26,7 +28,7 @@
   <div class="announcement">
     <div><span aria-hidden="true">🚚</span> Livraison disponible</div>
     <div><span aria-hidden="true">📱</span> Commande simple sur WhatsApp</div>
-    <div><span aria-hidden="true">✓</span> Sélection maison & cuisine</div>
+    <div><span aria-hidden="true">✓</span> Électronique • Électroménager • Soin &amp; bien-être</div>
   </div>
 
   <header class="site-header">
@@ -35,7 +37,6 @@
         <span class="brand-mark">N</span>
         <span>
           <strong>NOVAMARKET</strong>
-          <small>MAISON • CUISINE • LIFESTYLE</small>
         </span>
       </a>
 
@@ -43,9 +44,10 @@
 
       <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
         <a href="index.html">Accueil</a>
-        <a href="index.html#categories">Catégories</a>
+        <a href="categorie.html?cat=electronique" data-nav-category="electronique">Électronique</a>
+        <a href="categorie.html?cat=electromenager" data-nav-category="electromenager">Électroménager</a>
+        <a href="categorie.html?cat=bien-etre" data-nav-category="bien-etre">Soin &amp; bien-être</a>
         <a class="active" href="produits.html">Produits</a>
-        <a href="index.html#inspiration">Inspiration</a>
         <a href="index.html#apropos">À propos</a>
         <a href="index.html#contact">Contact</a>
         <a class="nav-whatsapp" data-whatsapp-link target="_blank" rel="noopener">Commander sur WhatsApp</a>
@@ -53,7 +55,11 @@
 
       <div class="nav-actions">
         <button type="button" class="icon-btn" id="searchBtn" aria-label="Rechercher" aria-haspopup="dialog">⌕</button>
-        <a class="whatsapp-btn" data-whatsapp-link target="_blank" rel="noopener">WhatsApp</a>
+        <a class="icon-btn cart-btn" href="panier.html" data-cart-link aria-label="Panier">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+          <span class="cart-count" data-cart-count hidden>0</span>
+        </a>
+        <a class="whatsapp-btn" data-whatsapp-link data-off-label="WhatsApp bientôt" target="_blank" rel="noopener">WhatsApp</a>
       </div>
     </div>
   </header>
@@ -88,14 +94,17 @@
       <div>
         <a class="brand footer-brand" href="index.html">
           <span class="brand-mark">N</span>
-          <span><strong>NOVAMARKET</strong><small>MAISON • CUISINE • LIFESTYLE</small></span>
+          <span><strong>NOVAMARKET</strong></span>
         </a>
-        <p>Des produits pratiques pour une maison plus simple et plus agréable.</p>
+        <p>L’innovation au service de votre quotidien.</p>
       </div>
       <div>
         <h2 class="footer-title">Navigation</h2>
         <a href="index.html">Accueil</a>
         <a href="index.html#categories">Catégories</a>
+        <a href="categorie.html?cat=electronique">Électronique</a>
+        <a href="categorie.html?cat=electromenager">Électroménager</a>
+        <a href="categorie.html?cat=bien-etre">Soin &amp; bien-être</a>
         <a href="produits.html">Produits</a>
         <a href="index.html#inspiration">Inspiration</a>
       </div>
@@ -103,10 +112,10 @@
         <h2 class="footer-title">Informations</h2>
         <a href="index.html#apropos">À propos</a>
         <a href="index.html#contact">Contact</a>
-        <a class="is-pending" title="Page bientôt disponible">Livraison</a>
-        <a class="is-pending" title="Page bientôt disponible">FAQ</a>
+        <a data-page-link="livraison">Livraison</a>
+        <a data-page-link="faq">FAQ</a>
       </div>
-      <div>
+      <div class="footer-social">
         <h2 class="footer-title">Nous suivre</h2>
         <a data-social="instagram">Instagram</a>
         <a data-social="facebook">Facebook</a>
@@ -115,7 +124,7 @@
     </div>
     <div class="container footer-bottom">
       <span>© <span id="year"></span> NovaMarket. Tous droits réservés.</span>
-      <span>Maison • Cuisine • Lifestyle</span>
+      <span>Électronique • Électroménager • Soin &amp; bien-être</span>
     </div>
   </footer>
 
@@ -125,11 +134,12 @@
       <span class="eyebrow">RECHERCHE</span>
       <h2 id="searchTitle">Que recherchez-vous ?</h2>
       <label class="sr-only" for="searchInput">Rechercher un produit</label>
-      <input type="search" id="searchInput" placeholder="Ex. air fryer, rangement, cuisine..." autocomplete="off">
+      <input type="search" id="searchInput" placeholder="Ex. air fryer, hachoir, ceinture..." autocomplete="off">
       <div id="searchResults" class="search-results" aria-live="polite"></div>
     </div>
   </div>
 
+  <script src="data/config.js"></script>
   <script src="data/products.js"></script>
   <script src="script.js"></script>
   <script src="produit.js"></script>

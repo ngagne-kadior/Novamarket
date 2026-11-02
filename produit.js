@@ -1,10 +1,12 @@
 // Page produit dynamique : produit.html?id=1
 
 const RELATED_LIMIT = 4;
-const MAX_QUANTITY = 20;
 
 // Icône WhatsApp (décorative : le texte du bouton suffit aux lecteurs d'écran).
 const WHATSAPP_ICON = `<svg class="btn-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.16-.17.2-.35.22-.64.08-.3-.15-1.26-.47-2.39-1.48-.88-.79-1.48-1.76-1.65-2.06-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.07c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35m-5.42 7.4h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.83 9.83 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.88 9.88m8.41-18.3A11.82 11.82 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89a11.82 11.82 0 0 0-3.48-8.41Z"/></svg>`;
+
+// Icône panier (décorative).
+const CART_ICON = `<svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>`;
 
 const productDetail = document.getElementById("productDetail");
 const productBreadcrumb = document.getElementById("productBreadcrumb");
@@ -29,15 +31,19 @@ function renderNotFound() {
 
 function renderProduct() {
   const discount = discountPercent(product);
+  const category = categoryOf(product);
+  const priced = hasPrice(product);
   const photos = galleryPhotos();
   const video = mediaSource(product.video);
+  const soldOut = isSoldOut(product);
+  const maxQuantity = maxOrderQuantity(product);
 
   document.title = `${product.name} — NovaMarket`;
   document.querySelector('meta[name="description"]').setAttribute("content", `${product.name} — ${product.description}`);
 
   productBreadcrumb.innerHTML = breadcrumbHTML([
     HOME_CRUMB,
-    { label: product.category, href: categoryUrl(product.category) },
+    { label: category.name, href: categoryUrl(category.id) },
     { label: product.name }
   ]);
 
@@ -46,11 +52,12 @@ function renderProduct() {
       ${galleryHTML(photos, video)}
 
       <div class="product-detail-info">
-        <a class="product-category" href="${categoryUrl(product.category)}">${escapeHTML(product.category)}</a>
+        <a class="product-category" href="${categoryUrl(category.id)}">${escapeHTML(category.name)}</a>
         <h1>${escapeHTML(product.name)}</h1>
         ${priceHTML(product, "product-detail-price")}
         ${discount ? `<p class="promo-note">Promotion : vous économisez ${formatPrice(product.oldPrice - product.price)}.</p>` : ""}
-        ${product.stock ? `<div class="product-stock">Disponibilité : ${availabilityHTML(product)}</div>` : ""}
+        <div class="product-stock">Disponibilité : ${availabilityHTML(product)}</div>
+        ${hasStockCount(product) && !soldOut ? `<p class="stock-note">${STOCK_NOTE}</p>` : ""}
 
         <p class="product-description">${escapeHTML(product.description)}</p>
 
@@ -58,29 +65,47 @@ function renderProduct() {
         <ul class="product-features">
           ${product.features.map(feature => `<li>${escapeHTML(feature)}</li>`).join("")}
         </ul>
+        ${product.featuresNote ? `<p class="product-features-note">${escapeHTML(product.featuresNote)}</p>` : ""}
 
+        ${soldOut ? "" : `
         <div class="order-box">
           <div class="quantity" role="group" aria-label="Quantité">
             <button type="button" id="qtyMinus" aria-label="Diminuer la quantité">−</button>
             <output id="qtyValue" aria-live="polite">1</output>
             <button type="button" id="qtyPlus" aria-label="Augmenter la quantité">+</button>
           </div>
-          <div class="order-total">Total : <strong id="orderTotal">${formatPrice(product.price)}</strong></div>
-        </div>
+          ${priced ? `<div class="order-total">Total des articles : <strong id="orderTotal">${formatPrice(product.price)}</strong>
+            <small>Hors livraison : ${escapeHTML(DELIVERY_INFO.feesNote.charAt(0).toLowerCase() + DELIVERY_INFO.feesNote.slice(1))}.</small></div>` : ""}
+        </div>`}
 
         <div class="product-detail-actions">
-          <a class="btn btn-primary btn-whatsapp" id="orderWhatsapp" href="${whatsappLink(product)}" target="_blank" rel="noopener">
+          ${soldOut ? `
+          <span class="btn btn-primary btn-whatsapp is-unavailable">Produit épuisé</span>
+          <p class="order-note">${SOLD_OUT_NOTE}</p>` : `
+          <button type="button" class="btn btn-primary btn-add-cart" id="addToCart">
+            ${CART_ICON}
+            <span>Ajouter au panier</span>
+          </button>
+          ${WHATSAPP_READY ? `
+          <a class="btn btn-light btn-whatsapp-direct" id="orderWhatsapp" href="${whatsappLink(product)}" target="_blank" rel="noopener">
             ${WHATSAPP_ICON}
-            <span>Commander sur WhatsApp</span>
+            <span>Commander directement sur WhatsApp</span>
             <span class="sr-only">(ouvre WhatsApp dans un nouvel onglet)</span>
           </a>
-          <p class="order-note">Le message est pré-rempli avec le nom du produit, la quantité et le prix.</p>
+          <p class="order-note">${priced
+            ? "Commande directe : le message est pré-rempli avec le nom du produit, la quantité et le prix."
+            : "Commande directe : le message est pré-rempli avec le nom du produit et la quantité ; le prix vous sera communiqué sur WhatsApp."}</p>` : `
+          <span class="btn btn-light btn-whatsapp-direct whatsapp-off">
+            ${WHATSAPP_ICON}
+            <span>${WHATSAPP_OFF_LABEL}</span>
+          </span>
+          <p class="order-note">${WHATSAPP_OFF_NOTE}</p>`}`}
         </div>
 
         <a class="back-link" href="produits.html"><span aria-hidden="true">←</span> Retour aux produits</a>
 
         <ul class="product-reassurance">
-          <li>${iconHTML("truck", 26)}<span>Livraison selon votre zone</span></li>
+          <li>${iconHTML("truck", 26)}<span>${escapeHTML(DELIVERY_INFO.areaNote || DELIVERY_INFO.feesNote)}</span></li>
           <li>${iconHTML("headset", 26)}<span>Réponse sur WhatsApp</span></li>
           <li>${iconHTML("shieldCheck", 26)}<span>Disponibilité confirmée avant commande</span></li>
         </ul>
@@ -88,6 +113,10 @@ function renderProduct() {
     </article>
   `;
 
+  initGallery(photos, video);
+  if (soldOut) return; // pas de sélecteur de quantité pour un produit épuisé
+
+  // Quantité : de 1 au stock disponible (stockQuantity), sans limite si le stock n'est pas chiffré.
   let quantity = 1;
   const qtyValue = document.getElementById("qtyValue");
   const orderTotal = document.getElementById("orderTotal");
@@ -96,25 +125,29 @@ function renderProduct() {
   const qtyPlus = document.getElementById("qtyPlus");
 
   function setQuantity(next) {
-    quantity = Math.min(MAX_QUANTITY, Math.max(1, next));
+    quantity = Math.min(maxQuantity, Math.max(1, next));
     qtyValue.textContent = quantity;
-    orderTotal.textContent = formatPrice(product.price * quantity);
-    orderWhatsapp.href = whatsappLink(product, quantity);
+    if (priced) orderTotal.textContent = formatPrice(product.price * quantity);
+    if (orderWhatsapp) orderWhatsapp.href = whatsappLink(product, quantity);
     qtyMinus.disabled = quantity === 1;
-    qtyPlus.disabled = quantity === MAX_QUANTITY;
+    qtyPlus.disabled = quantity === maxQuantity;
+    qtyPlus.title = qtyPlus.disabled ? "Quantité maximale disponible" : "";
   }
 
   qtyMinus.addEventListener("click", () => setQuantity(quantity - 1));
   qtyPlus.addEventListener("click", () => setQuantity(quantity + 1));
   setQuantity(1);
 
-  initGallery(photos, video);
+  // Ajout au panier avec la quantité choisie (plafonnée au stock par addToCart).
+  document.getElementById("addToCart").addEventListener("click", () => {
+    showCartToast(addToCartMessage(product, quantity, addToCart(product, quantity)));
+  });
 }
 
 /* ---------- Galerie produit (colonne image de la fiche) ----------
    Pilotée par data/products.js : gallery [{ src, thumb, alt }], video, videoPoster.
    - gallery vide : l'image principale du produit (imageUrl / image) est utilisée.
-   - Miniatures (verticales sur ordinateur, horizontales sur mobile) : une seule
+   - Miniatures (rangée horizontale sous l'image principale) : une seule
      tabulation pour la rangée, puis flèches ↑ ↓ ← →, Début / Fin.
    - ← → sur l'image principale : photo précédente / suivante.
    - Zoom : visionneuse plein écran (← →, Échap pour fermer).
@@ -563,13 +596,13 @@ function initGallery(photos, video) {
 
 // Produits similaires : d'abord la même catégorie, complétés par d'autres produits si besoin.
 function renderRelated() {
-  const sameCategory = products.filter(p => p.category === product.category && p.id !== product.id);
-  const others = products.filter(p => p.category !== product.category);
+  const sameCategory = visibleProducts.filter(p => p.category === product.category && p.id !== product.id);
+  const others = visibleProducts.filter(p => p.category !== product.category);
   const related = [...sameCategory, ...others].slice(0, RELATED_LIMIT);
 
   relatedGrid.innerHTML = related.map(productCardHTML).join("");
   relatedLink.href = categoryUrl(product.category);
-  relatedLink.textContent = `Voir la catégorie ${product.category} →`;
+  relatedLink.textContent = `Voir la catégorie ${categoryOf(product).name} →`;
   relatedSection.hidden = related.length === 0;
 }
 
