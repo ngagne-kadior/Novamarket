@@ -1,5 +1,5 @@
 // Page produits (catalogue complet) : filtre par catégorie, recherche et tri.
-// L'état est gardé dans l'URL (?cat=...&q=...&tri=...) pour pouvoir partager un lien filtré.
+// L'état est gardé dans l'URL (?cat=bien-etre&q=...&tri=...) pour pouvoir partager un lien filtré.
 // Le paramètre "tri" est validé par parseSort() (script.js) : toute valeur inconnue
 // (ex. "__proto__", "constructor") donne le tri par défaut.
 
@@ -10,18 +10,20 @@ const catalogueGrid = document.getElementById("catalogueGrid");
 const catalogueCount = document.getElementById("catalogueCount");
 const catalogueEmpty = document.getElementById("catalogueEmpty");
 const categoryPageLink = document.getElementById("categoryPageLink");
+const catalogueEmptyText = document.getElementById("catalogueEmptyText");
+const resetFilters = document.getElementById("resetFilters");
 
 const params = new URLSearchParams(window.location.search);
 const initialCategory = findCategory(params.get("cat"));
 const state = {
-  category: initialCategory ? initialCategory.name : "Tous",
+  category: initialCategory ? initialCategory.id : "", // id de catégorie, "" = toutes
   query: params.get("q") || "",
   sort: parseSort(params.get("tri"))
 };
 
 function updateUrl() {
   const next = new URLSearchParams();
-  if (state.category !== "Tous") next.set("cat", state.category);
+  if (state.category) next.set("cat", state.category);
   if (state.query) next.set("q", state.query);
   if (state.sort !== DEFAULT_SORT) next.set("tri", state.sort);
   const search = next.toString();
@@ -31,12 +33,12 @@ function updateUrl() {
 // Boutons de catégorie créés une seule fois (le focus clavier reste sur le bouton cliqué).
 function renderCategoryList() {
   const entries = [
-    { name: "Tous", count: products.length },
-    ...CATEGORIES.map(category => ({ name: category.name, count: productsInCategory(category.name).length }))
+    { id: "", name: "Tous", count: visibleProducts.length },
+    ...CATEGORIES.map(category => ({ id: category.id, name: category.name, count: productsInCategory(category.id).length }))
   ];
 
   categoryList.innerHTML = entries.map(entry => `
-    <button type="button" class="category-option" data-category-filter="${escapeHTML(entry.name)}" aria-pressed="false">
+    <button type="button" class="category-option" data-category-filter="${escapeHTML(entry.id)}" aria-pressed="false">
       <span>${escapeHTML(entry.name)}</span>
       <small>${entry.count}</small>
     </button>
@@ -53,21 +55,26 @@ function updateCategoryList() {
 
 function renderCatalogue() {
   const query = state.query.trim();
-  const filtered = products
-    .filter(product => state.category === "Tous" || product.category === state.category)
+  const activeCategory = findCategory(state.category);
+  const filtered = visibleProducts
+    .filter(product => !activeCategory || product.category === activeCategory.id)
     .filter(product => !query || matchesQuery(product, query));
   const list = sortProducts(filtered, state.sort);
 
   catalogueGrid.innerHTML = list.map(productCardHTML).join("");
   catalogueEmpty.hidden = list.length > 0;
+  // Catégorie encore vide (sans recherche) : « bientôt disponibles », pas « aucun résultat ».
+  const comingSoon = activeCategory && !query && productsInCategory(activeCategory.id).length === 0;
+  catalogueEmptyText.textContent = comingSoon ? `${COMING_SOON}.` : "Aucun produit ne correspond à votre recherche.";
+  resetFilters.textContent = comingSoon ? "Voir tous les produits" : "Réinitialiser les filtres";
   catalogueCount.textContent = `${list.length} produit${list.length > 1 ? "s" : ""}`
-    + (state.category !== "Tous" ? ` dans « ${state.category} »` : "")
+    + (activeCategory ? ` dans « ${activeCategory.name} »` : "")
     + (query ? ` pour « ${query} »` : "");
 
-  categoryPageLink.hidden = state.category === "Tous";
-  if (state.category !== "Tous") {
-    categoryPageLink.href = categoryUrl(state.category);
-    categoryPageLink.textContent = `Voir la page ${state.category} →`;
+  categoryPageLink.hidden = !activeCategory;
+  if (activeCategory) {
+    categoryPageLink.href = categoryUrl(activeCategory.id);
+    categoryPageLink.textContent = `Voir la page ${activeCategory.name} →`;
   }
 
   updateCategoryList();
@@ -91,8 +98,8 @@ sortSelect.addEventListener("change", () => {
   renderCatalogue();
 });
 
-document.getElementById("resetFilters").addEventListener("click", () => {
-  state.category = "Tous";
+resetFilters.addEventListener("click", () => {
+  state.category = "";
   state.query = "";
   catalogueSearch.value = "";
   renderCatalogue();

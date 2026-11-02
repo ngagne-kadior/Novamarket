@@ -1,8 +1,11 @@
 // Code commun à toutes les pages (accueil, produits, catégorie, produit).
-// Les données (WHATSAPP_NUMBER, SOCIAL_LINKS, CATEGORIES, products) viennent de
-// data/products.js, qui doit être chargé AVANT ce fichier.
+// Les données viennent de data/config.js (WHATSAPP_NUMBER, DELIVERY_INFO, SOCIAL_LINKS)
+// et de data/products.js (CATEGORIES, products), chargés AVANT ce fichier.
 
 const HOME_PRODUCT_LIMIT = 8;
+
+// Message d'une catégorie qui n'a encore aucun produit visible.
+const COMING_SOON = "Produits bientôt disponibles";
 
 // Libellés du champ optionnel "stock" des produits (voir data/products.js).
 const AVAILABILITY = {
@@ -10,6 +13,10 @@ const AVAILABILITY = {
   "stock-limite": { label: "Stock limité", tone: "warn" },
   "sur-commande": { label: "Sur commande", tone: "info" }
 };
+const AVAILABILITY_SOLD_OUT = { label: "Épuisé", tone: "out" };
+const SOLD_OUT_NOTE = "Ce produit est momentanément épuisé.";
+// Le stock chiffré est mis à jour à la main : il reste indicatif.
+const STOCK_NOTE = "Disponibilité indicative, confirmée par NovaMarket sur WhatsApp avant toute commande.";
 const AVAILABILITY_UNKNOWN = { label: "À confirmer sur WhatsApp", tone: "info" };
 
 /* ---------- Utilitaires ---------- */
@@ -30,41 +37,68 @@ function formatPrice(value) {
   return `${value.toLocaleString("fr-FR").replace(/[\u202f\u00a0]/g, " ")} FCFA`;
 }
 
+// Prix non renseigné (price: null) : la boutique le communique sur WhatsApp.
+const PRICE_ON_REQUEST = "Prix sur demande";
+
+function hasPrice(product) {
+  return Number.isFinite(product.price);
+}
+
+function priceLabel(product) {
+  return hasPrice(product) ? formatPrice(product.price) : PRICE_ON_REQUEST;
+}
+
+// Accepte l'id ("bien-etre") ou le nom ("Électroménager", "electromenager"...).
+function findCategory(value) {
+  if (!value) return undefined;
+  const key = normalize(value);
+  return CATEGORIES.find(category => category.id === key || normalize(category.name) === key);
+}
+
+// Catégorie d'un produit (undefined si sa catégorie a été retirée).
+function categoryOf(product) {
+  return CATEGORIES.find(category => category.id === product.category);
+}
+
+// Produits publics : ceux dont la catégorie existe encore dans CATEGORIES.
+// Les produits des catégories retirées restent dans data/products.js mais ne sont affichés nulle part.
+const visibleProducts = products.filter(product => categoryOf(product));
+
 function findProduct(id) {
-  return products.find(product => String(product.id) === String(id));
+  return visibleProducts.find(product => String(product.id) === String(id));
 }
 
-// Accepte "Électroménager", "electromenager", "ELECTROMENAGER"...
-function findCategory(name) {
-  if (!name) return undefined;
-  return CATEGORIES.find(category => normalize(category.name) === normalize(name));
-}
-
-function productsInCategory(categoryName) {
-  return products.filter(product => product.category === categoryName);
+function productsInCategory(categoryId) {
+  return visibleProducts.filter(product => product.category === categoryId);
 }
 
 function productUrl(product) {
   return `produit.html?id=${product.id}`;
 }
 
-function categoryUrl(categoryName) {
-  return `categorie.html?cat=${encodeURIComponent(categoryName)}`;
+function categoryUrl(categoryId) {
+  return `categorie.html?cat=${encodeURIComponent(categoryId)}`;
 }
 
 function matchesQuery(product, query) {
-  return normalize(`${product.name} ${product.category} ${product.tag || ""}`).includes(normalize(query));
+  return normalize(`${product.name} ${categoryOf(product).name} ${product.tag || ""}`).includes(normalize(query));
 }
 
 /* ---------- Tri (paramètre URL ?tri=...) ---------- */
+
+// Les produits sans prix ("Prix sur demande") sont toujours placés en fin de liste.
+function byPrice(a, b, direction) {
+  if (!hasPrice(a) || !hasPrice(b)) return hasPrice(b) - hasPrice(a) || a.id - b.id;
+  return (a.price - b.price) * direction;
+}
 
 // Seules ces valeurs sont acceptées. Map (et non objet) : aucune clé héritée
 // comme "__proto__" ou "constructor" ne peut être atteinte depuis l'URL.
 const DEFAULT_SORT = "default";
 const PRODUCT_SORTERS = new Map([
   ["default", (a, b) => a.id - b.id],
-  ["price-asc", (a, b) => a.price - b.price],
-  ["price-desc", (a, b) => b.price - a.price],
+  ["price-asc", (a, b) => byPrice(a, b, 1)],
+  ["price-desc", (a, b) => byPrice(a, b, -1)],
   ["name", (a, b) => a.name.localeCompare(b.name, "fr")]
 ]);
 
@@ -87,26 +121,56 @@ function sortProducts(list, sortKey) {
 }
 
 function discountPercent(product) {
-  return product.oldPrice > product.price
+  return hasPrice(product) && product.oldPrice > product.price
     ? Math.round((1 - product.price / product.oldPrice) * 100)
     : 0;
 }
 
-/* ---------- WhatsApp (une seule constante : WHATSAPP_NUMBER) ---------- */
+/* ---------- WhatsApp (une seule constante : WHATSAPP_NUMBER, dans data/config.js) ---------- */
 
+// Numéro valide : chiffres uniquement, indicatif pays compris (8 à 15 chiffres).
+// Tant qu'il est vide ou invalide, aucun lien WhatsApp n'est créé : les boutons
+// de commande sont désactivés et affichent WHATSAPP_OFF_LABEL.
+const WHATSAPP_READY = /^[1-9]\d{7,14}$/.test(String(WHATSAPP_NUMBER).trim());
+const WHATSAPP_OFF_LABEL = "WhatsApp bientôt disponible";
+const WHATSAPP_OFF_NOTE = "La commande sur WhatsApp sera disponible très prochainement : le numéro de NovaMarket est en cours de confirmation.";
+
+// "" si le numéro n'est pas configuré.
 function whatsappUrl(text) {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+  return WHATSAPP_READY ? `https://wa.me/${WHATSAPP_NUMBER.trim()}?text=${encodeURIComponent(text)}` : "";
 }
 
+// Bouton WhatsApp généré en HTML : lien actif, ou texte désactivé si le numéro n'est pas configuré.
+// attrs : attributs supplémentaires du lien actif (ex. aria-label).
+function whatsappButtonHTML(url, className, label, attrs = "") {
+  return url
+    ? `<a class="${className}" href="${url}" target="_blank" rel="noopener"${attrs}>${label}</a>`
+    : `<span class="${className} whatsapp-off" title="${escapeHTML(WHATSAPP_OFF_NOTE)}">${WHATSAPP_OFF_LABEL}</span>`;
+}
+
+// Lien WhatsApp déjà présent dans la page : href ajouté, ou lien désactivé avec message
+// (data-off-label : libellé court pour les boutons étroits, ex. celui de l'en-tête).
+function applyWhatsappLink(link, url) {
+  if (url) {
+    link.href = url;
+    return;
+  }
+  link.removeAttribute("href");
+  link.removeAttribute("target");
+  link.classList.add("whatsapp-off");
+  link.title = WHATSAPP_OFF_NOTE;
+  link.textContent = link.dataset.offLabel || WHATSAPP_OFF_LABEL;
+}
+
+// Commande individuelle : une DEMANDE de commande, ni vente ni paiement confirmés.
 function whatsappLink(product = null, quantity = 1) {
-  const request = "Pouvez-vous me confirmer la disponibilité et les modalités de commande ?";
-  if (product && quantity > 1) {
-    return whatsappUrl(`Bonjour NovaMarket, je souhaite commander ${quantity} × "${product.name}" (${formatPrice(product.price)} l'unité, soit ${formatPrice(product.price * quantity)}). ${request}`);
-  }
-  if (product) {
-    return whatsappUrl(`Bonjour NovaMarket, je suis intéressé(e) par le produit "${product.name}" affiché à ${formatPrice(product.price)}. ${request}`);
-  }
-  return whatsappUrl("Bonjour NovaMarket, je souhaite avoir des informations sur vos produits.");
+  if (!product) return whatsappUrl("Bonjour NovaMarket, je souhaite avoir des informations sur vos produits.");
+  const price = !hasPrice(product)
+    ? "à confirmer"
+    : quantity > 1
+      ? `${formatPrice(product.price)} l'unité, soit ${formatPrice(product.price * quantity)}`
+      : formatPrice(product.price);
+  return whatsappUrl(`Bonjour NovaMarket, je souhaite passer une commande pour le produit suivant : ${product.name}. Quantité : ${quantity}. Prix : ${price}. Merci de me confirmer sa disponibilité ainsi que les modalités de livraison.`);
 }
 
 function categoryWhatsappLink(category) {
@@ -191,19 +255,46 @@ document.addEventListener("error", event => {
 }, true);
 
 function priceHTML(product, className = "product-price") {
+  if (!hasPrice(product)) {
+    return `<div class="${className} price-on-request"><span>${PRICE_ON_REQUEST}</span></div>`;
+  }
   const oldPrice = product.oldPrice > product.price
     ? `<span class="old-price">${formatPrice(product.oldPrice)}</span>`
     : "";
   return `<div class="${className}"><span>${formatPrice(product.price)}</span>${oldPrice}</div>`;
 }
 
+/* ---------- Stock ----------
+   stockQuantity (nombre, saisi à la main dans data/products.js) est prioritaire sur stock (texte).
+   Il n'est jamais décrémenté automatiquement : une demande WhatsApp n'est pas une vente confirmée. */
+
+function hasStockCount(product) {
+  return Number.isInteger(product.stockQuantity);
+}
+
+function isSoldOut(product) {
+  return hasStockCount(product) && product.stockQuantity <= 0;
+}
+
+// Quantité maximale commandable : le stock s'il est chiffré (jamais négative), sinon aucune limite :
+// sans stock confirmé, NovaMarket confirme la disponibilité sur WhatsApp.
+function maxOrderQuantity(product) {
+  return hasStockCount(product) ? Math.max(0, product.stockQuantity) : Infinity;
+}
+
+function availabilityOf(product) {
+  if (hasStockCount(product)) return isSoldOut(product) ? AVAILABILITY_SOLD_OUT : AVAILABILITY["en-stock"];
+  return Object.hasOwn(AVAILABILITY, product.stock || "") ? AVAILABILITY[product.stock] : AVAILABILITY_UNKNOWN;
+}
+
 function availabilityHTML(product) {
-  const availability = AVAILABILITY[product.stock] || AVAILABILITY_UNKNOWN;
+  const availability = availabilityOf(product);
   return `<span class="availability availability-${availability.tone}">${availability.label}</span>`;
 }
 
 function badgesHTML(product) {
   const discount = discountPercent(product);
+  if (isSoldOut(product)) return `<span class="product-tag product-tag-out">Épuisé</span>`;
   return (product.tag ? `<span class="product-tag">${escapeHTML(product.tag)}</span>` : "")
     + (discount ? `<span class="product-discount">-${discount}%</span>` : "");
 }
@@ -220,11 +311,13 @@ function productCardHTML(product) {
         ${badgesHTML(product)}
       </a>
       <div class="product-info">
-        <a class="product-category" href="${categoryUrl(product.category)}">${escapeHTML(product.category)}</a>
+        <a class="product-category" href="${categoryUrl(product.category)}">${escapeHTML(categoryOf(product).name)}</a>
         <h3 class="product-name"><a href="${url}">${name}</a></h3>
         ${priceHTML(product)}
         <div class="product-actions">
-          <a class="card-whatsapp" href="${whatsappLink(product)}" target="_blank" rel="noopener" aria-label="Commander ${name} sur WhatsApp">Commander sur WhatsApp</a>
+          ${isSoldOut(product)
+            ? `<span class="card-add is-unavailable">Épuisé</span>`
+            : `<button type="button" class="card-add" data-add-to-cart="${escapeHTML(product.id)}" aria-label="Ajouter ${name} au panier">Ajouter au panier</button>`}
           <a class="card-details" href="${url}" aria-label="Voir le produit ${name}">Voir le produit</a>
         </div>
       </div>
@@ -245,26 +338,188 @@ const HOME_CRUMB = { label: "Accueil", href: "index.html" };
 /* ---------- Liens WhatsApp généraux et réseaux sociaux ---------- */
 
 // Les liens [data-whatsapp-link] n'ont pas de href dans le HTML (pas de lien "#" trompeur) :
-// il est ajouté ici à partir de WHATSAPP_NUMBER.
+// il est ajouté ici à partir de WHATSAPP_NUMBER (ou le lien est désactivé si le numéro est vide).
 document.querySelectorAll("[data-whatsapp-link]").forEach(link => {
-  link.href = whatsappLink();
+  applyWhatsappLink(link, whatsappLink());
 });
 
-// Réseaux sociaux (pied de page) : lien actif seulement si l'URL est renseignée dans SOCIAL_LINKS.
+// Réseaux sociaux (pied de page) : lien affiché seulement si l'URL est renseignée dans SOCIAL_LINKS.
 document.querySelectorAll("[data-social]").forEach(link => {
   const url = SOCIAL_LINKS[link.dataset.social];
   if (url) {
     link.href = url;
     link.target = "_blank";
     link.rel = "noopener";
-    link.classList.remove("is-pending");
   } else {
-    link.classList.add("is-pending");
-    link.title = "Bientôt disponible";
+    link.remove();
   }
 });
 
+// Aucun réseau configuré : la colonne « Nous suivre » est retirée elle aussi.
+document.querySelectorAll(".footer-social").forEach(column => {
+  if (!column.querySelector("[data-social]")) {
+    column.parentElement.classList.add("no-social");
+    column.remove();
+  }
+});
+
+// Pages d'information (pied de page) : lien affiché seulement si la page est renseignée dans PAGE_LINKS.
+document.querySelectorAll("[data-page-link]").forEach(link => {
+  const url = PAGE_LINKS[link.dataset.pageLink];
+  if (url) link.href = url;
+  else link.remove();
+});
+
+// Zone de livraison (data/config.js) : affichée seulement si elle est renseignée.
+document.querySelectorAll("[data-delivery-area]").forEach(element => {
+  if (DELIVERY_INFO.areaNote) element.textContent = DELIVERY_INFO.areaNote;
+});
+
 document.getElementById("year").textContent = new Date().getFullYear();
+
+/* ---------- Panier (enregistré sur l'appareil du client) ----------
+   Seuls l'id et la quantité de chaque article sont enregistrés : le nom, le prix et
+   le stock sont TOUJOURS relus dans data/products.js. Aucune donnée personnelle
+   (nom, quartier, précisions) n'est enregistrée. Le stock n'est jamais décrémenté. */
+
+const CART_KEY = "novamarket-panier";
+const CART_MAX_LINES = 50;
+let cartMemory = []; // secours si le stockage du navigateur est indisponible (navigation privée...)
+
+function cartStorageAvailable() {
+  try {
+    localStorage.setItem(`${CART_KEY}-test`, "1");
+    localStorage.removeItem(`${CART_KEY}-test`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const CART_PERSISTENT = cartStorageAvailable();
+
+// Lignes valides uniquement : { id, qty } avec qty entier ≥ 1, sans doublon.
+function readCart() {
+  let raw = cartMemory;
+  if (CART_PERSISTENT) {
+    try {
+      const stored = localStorage.getItem(CART_KEY);
+      raw = stored ? JSON.parse(stored).items : [];
+    } catch {
+      raw = []; // contenu illisible : panier considéré comme vide
+    }
+  }
+  const seen = new Set();
+  return (Array.isArray(raw) ? raw : [])
+    .filter(item => item && ["string", "number"].includes(typeof item.id) && Number.isInteger(item.qty) && item.qty > 0)
+    .filter(item => !seen.has(String(item.id)) && seen.add(String(item.id)))
+    .slice(0, CART_MAX_LINES)
+    .map(item => ({ id: item.id, qty: item.qty }));
+}
+
+function writeCart(items) {
+  cartMemory = items;
+  try {
+    if (items.length) localStorage.setItem(CART_KEY, JSON.stringify({ v: 1, items }));
+    else localStorage.removeItem(CART_KEY);
+  } catch {
+    // stockage indisponible : le panier reste valable pour cette page
+  }
+  updateCartCount();
+}
+
+// Article commandable : produit visible, non épuisé.
+function orderableProduct(id) {
+  const product = findProduct(id);
+  return product && !isSoldOut(product) ? product : undefined;
+}
+
+// Nombre d'articles commandables (quantités plafonnées au stock).
+function cartCount() {
+  return readCart().reduce((total, item) => {
+    const product = orderableProduct(item.id);
+    return product ? total + Math.min(item.qty, maxOrderQuantity(product)) : total;
+  }, 0);
+}
+
+// Ajoute quantity unités, sans dépasser le stock / la limite par commande.
+function addToCart(product, quantity = 1) {
+  if (!orderableProduct(product.id)) return { added: 0, total: 0, max: 0 };
+  const max = maxOrderQuantity(product);
+  const items = readCart();
+  const line = items.find(item => String(item.id) === String(product.id));
+  const current = line ? Math.min(line.qty, max) : 0;
+  const total = Math.min(max, current + Math.max(1, quantity));
+  if (line) line.qty = total;
+  else items.push({ id: product.id, qty: total });
+  writeCart(items);
+  return { added: total - current, total, max };
+}
+
+function addToCartMessage(product, quantity, result) {
+  const name = `« ${product.name} »`;
+  if (result.added === 0) return `Quantité maximale de ${name} déjà dans votre panier (${result.max}).`;
+  if (result.added < quantity) return `${name} : quantité limitée à ${result.max} (maximum disponible). ${result.total} dans votre panier.`;
+  return result.added > 1 ? `${result.added} × ${name} ajoutés au panier.` : `${name} ajouté au panier.`;
+}
+
+function updateCartCount() {
+  const count = cartCount();
+  document.querySelectorAll("[data-cart-count]").forEach(badge => {
+    badge.textContent = count > 99 ? "99+" : String(count);
+    badge.hidden = count === 0;
+  });
+  document.querySelectorAll("[data-cart-link]").forEach(link => {
+    link.setAttribute("aria-label", count ? `Panier : ${count} article${count > 1 ? "s" : ""}` : "Panier (vide)");
+  });
+}
+
+// Confirmation d'ajout : la page ne change pas, lien « Voir le panier ».
+// La zone d'annonce (role="status") reste dans la page ; elle est vidée une fois masquée,
+// pour qu'aucun lien invisible ne reste accessible au clavier.
+const CART_TOAST_DURATION = 6000;
+const cartToast = document.createElement("div");
+cartToast.className = "cart-toast";
+cartToast.setAttribute("role", "status");
+document.body.appendChild(cartToast);
+let cartToastTimer = null;
+
+function showCartToast(message) {
+  cartToast.innerHTML = `<span>${escapeHTML(message)}</span><a href="panier.html">Voir le panier <span aria-hidden="true">→</span></a>`;
+  cartToast.classList.add("visible");
+  clearTimeout(cartToastTimer);
+  cartToastTimer = setTimeout(() => {
+    if (cartToast.contains(document.activeElement)) return; // lien en cours d'utilisation : on le laisse
+    cartToast.classList.remove("visible");
+    cartToastTimer = setTimeout(() => { cartToast.innerHTML = ""; }, 250);
+  }, CART_TOAST_DURATION);
+}
+
+// Le focus quitte le lien « Voir le panier » : le message se ferme normalement.
+cartToast.addEventListener("focusout", () => {
+  if (!cartToast.classList.contains("visible")) return;
+  clearTimeout(cartToastTimer);
+  cartToastTimer = setTimeout(() => {
+    cartToast.classList.remove("visible");
+    cartToastTimer = setTimeout(() => { cartToast.innerHTML = ""; }, 250);
+  }, 1500);
+});
+
+// Boutons « Ajouter au panier » des cartes produit (y compris celles ajoutées plus tard).
+document.addEventListener("click", event => {
+  const button = event.target.closest("[data-add-to-cart]");
+  if (!button) return;
+  const product = findProduct(button.dataset.addToCart);
+  if (!product) return;
+  showCartToast(addToCartMessage(product, 1, addToCart(product, 1)));
+});
+
+// Panier modifié dans un autre onglet : compteur mis à jour.
+window.addEventListener("storage", event => {
+  if (event.key === CART_KEY) updateCartCount();
+});
+
+updateCartCount();
 
 /* ---------- Menu mobile ---------- */
 
@@ -304,7 +559,7 @@ mainNav.addEventListener("focusout", event => {
 });
 
 // Passage en affichage bureau (rotation, redimensionnement) : le menu mobile est réinitialisé.
-const desktopNav = window.matchMedia("(min-width: 901px)");
+const desktopNav = window.matchMedia("(min-width: 1101px)"); // même seuil que le menu burger dans style.css
 desktopNav.addEventListener("change", () => {
   if (desktopNav.matches) setMenuOpen(false);
 });
@@ -435,12 +690,12 @@ searchInput.addEventListener("input", () => {
     return;
   }
 
-  const matches = products.filter(product => matchesQuery(product, query));
+  const matches = visibleProducts.filter(product => matchesQuery(product, query));
 
   searchResults.innerHTML = matches.length
     ? matches.map(product => `
       <a class="search-result" href="${productUrl(product)}">
-        <strong>${escapeHTML(product.name)}</strong> — ${formatPrice(product.price)}
+        <strong>${escapeHTML(product.name)}</strong> — ${priceLabel(product)}
       </a>
     `).join("") + `<a class="search-result search-all" href="produits.html?q=${encodeURIComponent(query)}">Voir tous les résultats →</a>`
     : "<p class='search-result'>Aucun produit trouvé pour cette recherche.</p>";
@@ -455,19 +710,46 @@ searchInput.addEventListener("keydown", event => {
 
 searchResults.innerHTML = SEARCH_HINT;
 
+/* ---------- Accueil : cartes de catégorie (générées depuis CATEGORIES) ---------- */
+
+const homeCategoryGrid = document.getElementById("homeCategoryGrid");
+
+function categoryCardHTML(category) {
+  const media = category.cardImage
+    ? `<div class="category-media"><img src="${escapeHTML(category.cardImage)}" alt="${escapeHTML(category.cardImageAlt || "")}" width="600" height="750" loading="lazy" decoding="async"></div>`
+    : `<div class="category-media is-placeholder"><span class="brand-mark" aria-hidden="true">N</span></div>`;
+  return `
+    <a class="category-card" href="${categoryUrl(category.id)}">
+      ${media}
+      <div class="category-body">
+        <h3>${escapeHTML(category.name)}</h3>
+        <p class="category-text">${escapeHTML(category.cardText || category.tagline)}</p>
+        <span class="category-link">Voir la catégorie <span aria-hidden="true">→</span></span>
+      </div>
+    </a>
+  `;
+}
+
+if (homeCategoryGrid) {
+  homeCategoryGrid.innerHTML = CATEGORIES.map(categoryCardHTML).join("");
+}
+
 /* ---------- Accueil : sélection de produits avec filtres ---------- */
 
 const productGrid = document.getElementById("productGrid");
 const filters = document.getElementById("filters");
 
-function renderProducts(filter = "Tous") {
-  const list = filter === "Tous" ? products : productsInCategory(filter);
-  productGrid.innerHTML = list.slice(0, HOME_PRODUCT_LIMIT).map(productCardHTML).join("");
+// filter : id de catégorie, "" = tous les produits.
+function renderProducts(filter = "") {
+  const list = filter ? productsInCategory(filter) : visibleProducts;
+  productGrid.innerHTML = list.length
+    ? list.slice(0, HOME_PRODUCT_LIMIT).map(productCardHTML).join("")
+    : `<p class="grid-empty">${COMING_SOON}.</p>`;
 }
 
 if (productGrid && filters) {
-  filters.innerHTML = ["Tous", ...CATEGORIES.map(category => category.name)]
-    .map(name => `<button type="button" class="filter${name === "Tous" ? " active" : ""}" data-filter="${escapeHTML(name)}" aria-pressed="${name === "Tous"}">${escapeHTML(name)}</button>`)
+  filters.innerHTML = [{ id: "", name: "Tous" }, ...CATEGORIES]
+    .map(category => `<button type="button" class="filter${category.id ? "" : " active"}" data-filter="${escapeHTML(category.id)}" aria-pressed="${!category.id}">${escapeHTML(category.name)}</button>`)
     .join("");
 
   filters.addEventListener("click", event => {
