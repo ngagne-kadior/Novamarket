@@ -1,5 +1,5 @@
 // Configuration de la boutique NovaMarket, partagée par toutes les pages.
-// C'est le SEUL fichier à modifier pour le numéro WhatsApp, la livraison, les réseaux sociaux et les pages d'information.
+// C'est le SEUL fichier à modifier pour le numéro WhatsApp, la livraison et les réseaux sociaux.
 // Ordre de chargement dans chaque page : data/config.js → data/products.js → script.js → script de la page.
 // Attention : ce fichier est public (visible par tous les visiteurs) — n'y mettre aucune donnée interne
 // (coûts d'achat, marges, fournisseurs...).
@@ -33,22 +33,12 @@ const DELIVERY_INFO = {
 
 /* =====================================================================
    RÉSEAUX SOCIAUX (pied de page)
-   Laisser "" tant que le compte n'est pas créé : le lien n'est pas affiché
+   Lien ouvert dans un nouvel onglet. Laisser "" pour masquer un réseau
    (la colonne « Nous suivre » disparaît si aucun réseau n'est renseigné).
    ===================================================================== */
 
 const SOCIAL_LINKS = {
-  instagram: "", // À RENSEIGNER, ex. "https://www.instagram.com/..."
-  facebook: "",  // À RENSEIGNER
-  tiktok: ""     // À RENSEIGNER
-};
-
-/* =====================================================================
-   PAGES D'INFORMATION (pied de page)
-   Laisser "" tant que la page n'existe pas : le lien n'est pas affiché.
-   ===================================================================== */
-
-const PAGE_LINKS = {
-  livraison: "", // À RENSEIGNER, ex. "livraison.html"
-  faq: ""        // À RENSEIGNER, ex. "faq.html"
+  instagram: "https://www.instagram.com/novamarket_office/",
+  facebook: "https://www.facebook.com/share/19vv2Xevcd/",
+  tiktok: "https://www.tiktok.com/@novamarket_office"
 };

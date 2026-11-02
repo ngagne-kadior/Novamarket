@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NovaMarket, créée en 2023 à Mbour au Sénégal : des produits utiles, pratiques et accessibles en électronique, électroménager, soin et bien-être.">
+  <title>À propos — NovaMarket</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+
+  <!-- Open Graph (aperçu des liens partagés, ex. sur WhatsApp) -->
+  <!-- og:image : URL absolue obligatoire (domaine Vercel actuel) — à modifier si le site change de domaine. Image : images/og-image.jpg (1200 × 630 px). -->
+  <meta property="og:site_name" content="NovaMarket">
+  <meta property="og:locale" content="fr_FR">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="À propos — NovaMarket">
+  <meta property="og:description" content="NovaMarket, créée en 2023 à Mbour au Sénégal : des produits utiles, pratiques et accessibles en électronique, électroménager, soin et bien-être.">
+  <meta property="og:image" content="https://novamarket-plum.vercel.app/images/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <div class="announcement">
+    <div><span aria-hidden="true">🚚</span> Livraison disponible</div>
+    <div><span aria-hidden="true">📱</span> Commande simple sur WhatsApp</div>
+    <div><span aria-hidden="true">✓</span> Électronique • Électroménager • Soin &amp; bien-être</div>
+  </div>
+
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="index.html" aria-label="NovaMarket accueil">
+        <span class="brand-mark">N</span>
+        <span>
+          <strong>NOVAMARKET</strong>
+        </span>
+      </a>
+
+      <button type="button" class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu" aria-controls="mainNav" aria-expanded="false">☰</button>
+
+      <nav class="main-nav" id="mainNav" aria-label="Navigation principale">
+        <a href="index.html">Accueil</a>
+        <a href="categorie.html?cat=electronique" data-nav-category="electronique">Électronique</a>
+        <a href="categorie.html?cat=electromenager" data-nav-category="electromenager">Électroménager</a>
+        <a href="categorie.html?cat=bien-etre" data-nav-category="bien-etre">Soin &amp; bien-être</a>
+        <a href="produits.html">Produits</a>
+        <a class="active" href="apropos.html" aria-current="page">À propos</a>
+        <a href="index.html#contact">Contact</a>
+        <a class="nav-whatsapp" data-whatsapp-link target="_blank" rel="noopener">Commander sur WhatsApp</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button type="button" class="icon-btn" id="searchBtn" aria-label="Rechercher" aria-haspopup="dialog">⌕</button>
+        <a class="icon-btn cart-btn" href="panier.html" data-cart-link aria-label="Panier">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 4h2.2l2.1 10.2a1.5 1.5 0 0 0 1.5 1.2h8.3a1.5 1.5 0 0 0 1.5-1.1L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.3"/><circle cx="17" cy="19.5" r="1.3"/></svg>
+          <span class="cart-count" data-cart-count hidden>0</span>
+        </a>
+        <a class="whatsapp-btn" data-whatsapp-link data-off-label="WhatsApp bientôt" target="_blank" rel="noopener">WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="contenu" tabindex="-1">
+    <section class="page-hero">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Fil d'Ariane">
+          <ol><li><a href="index.html">Accueil</a></li><li><span aria-current="page">À propos</span></li></ol>
+        </nav>
+        <span class="eyebrow">À PROPOS DE NOVAMARKET</span>
+        <h1>L'innovation au service de <em>votre quotidien.</em></h1>
+      </div>
+    </section>
+
+    <section class="section about-section" aria-labelledby="historyTitle">
+      <div class="container about-grid">
+        <div>
+          <span class="eyebrow">DEPUIS 2023</span>
+          <h2 id="historyTitle">Notre <em>histoire.</em></h2>
+        </div>
+        <div class="about-text">
+          <p>Créée en 2023 à Mbour, au Sénégal, NovaMarket est née d'une ambition : rendre le quotidien plus simple grâce à des produits utiles, pratiques et accessibles.</p>
+          <p>Nous sommes partis d'une conviction : chacun devrait pouvoir accéder facilement à des produits capables de répondre à ses besoins quotidiens et de lui apporter davantage de confort.</p>
+          <p>C'est dans cette vision que NovaMarket a été créée, avec la volonté de proposer une sélection de produits dans plusieurs domaines, notamment le soin &amp; bien-être, l'électronique et l'électroménager.</p>
+          <p>Depuis nos débuts, notre objectif reste le même : rechercher des solutions pratiques, faciliter les achats et contribuer à améliorer le quotidien de nos clients.</p>
+          <p class="about-signature">NovaMarket : l'innovation au service de votre quotidien.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section promise-section" aria-labelledby="promiseTitle">
+      <div class="container about-grid">
+        <div>
+          <span class="eyebrow">NOS ENGAGEMENTS</span>
+          <h2 id="promiseTitle">Notre <em>promesse.</em></h2>
+        </div>
+        <div class="about-text">
+          <p>Chez NovaMarket, nous ne voulons pas simplement vendre des produits. Nous voulons proposer des solutions qui répondent à de véritables besoins du quotidien.</p>
+          <p>Notre engagement repose sur cinq principes :</p>
+          <ul class="promise-list">
+            <li><strong>L'utilité</strong> : proposer des produits qui apportent une réponse concrète aux besoins de nos clients.</li>
+            <li><strong>La praticité</strong> : sélectionner des articles qui facilitent les gestes et les activités du quotidien.</li>
+            <li><strong>L'accessibilité</strong> : rendre les produits intéressants accessibles à travers une expérience d'achat simple.</li>
+            <li><strong>La transparence</strong> : fournir des informations claires sur les produits, les prix et les conditions de commande.</li>
+            <li><strong>L'accompagnement</strong> : rester à l'écoute de nos clients et les guider tout au long de leur expérience d'achat.</li>
+          </ul>
+          <p>Notre ambition est de devenir une référence de confiance pour les personnes qui recherchent des produits pratiques et des solutions adaptées à leur quotidien.</p>
+          <p class="about-signature">NovaMarket, des produits utiles pour un quotidien plus facile.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="offerTitle">
+      <div class="container">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">NOS CATÉGORIES</span>
+            <h2 id="offerTitle">Ce que nous <em>proposons.</em></h2>
+          </div>
+          <a href="produits.html" class="text-link">Voir tout le catalogue →</a>
+        </div>
+        <!-- Cartes générées depuis CATEGORIES (data/products.js), comme sur l'accueil -->
+        <div class="category-grid" id="homeCategoryGrid"></div>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <div class="container contact-box">
+        <div>
+          <span class="eyebrow">UNE QUESTION ?</span>
+          <h2>Parlons de votre prochain achat.</h2>
+          <p>Une question sur un produit ou une disponibilité ? Écrivez-nous directement.</p>
+        </div>
+        <a class="btn btn-dark" data-whatsapp-link target="_blank" rel="noopener">Commander sur WhatsApp →</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div>
+        <a class="brand footer-brand" href="index.html">
+          <span class="brand-mark">N</span>
+          <span><strong>NOVAMARKET</strong></span>
+        </a>
+        <p>L’innovation au service de votre quotidien.</p>
+      </div>
+      <div>
+        <h2 class="footer-title">Navigation</h2>
+        <a href="index.html">Accueil</a>
+        <a href="index.html#categories">Catégories</a>
+        <a href="categorie.html?cat=electronique">Électronique</a>
+        <a href="categorie.html?cat=electromenager">Électroménager</a>
+        <a href="categorie.html?cat=bien-etre">Soin &amp; bien-être</a>
+        <a href="produits.html">Produits</a>
+      </div>
+      <div>
+        <h2 class="footer-title">Informations</h2>
+        <a href="apropos.html">À propos</a>
+        <a href="index.html#contact">Contact</a>
+      </div>
+      <div class="footer-social">
+        <h2 class="footer-title">Nous suivre</h2>
+        <a data-social="instagram"><svg class="social-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg><span>Instagram</span></a>
+        <a data-social="facebook"><svg class="social-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V10H6.5v3.5H9V21h3.5v-7.5H15l.5-3.5h-3V7a1 1 0 0 1 1-1H15z"/></svg><span>Facebook</span></a>
+        <a data-social="tiktok"><svg class="social-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M14 3v11.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 3c.5 2.6 2.3 4.3 5 4.5"/></svg><span>TikTok</span></a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <span>© <span id="year"></span> NovaMarket. Tous droits réservés.</span>
+      <span>Électronique • Électroménager • Soin &amp; bien-être</span>
+    </div>
+  </footer>
+
+  <div class="search-modal" id="searchModal">
+    <div class="search-panel" role="dialog" aria-modal="true" aria-labelledby="searchTitle">
+      <button type="button" class="close-search" id="closeSearch" aria-label="Fermer la recherche">×</button>
+      <span class="eyebrow">RECHERCHE</span>
+      <h2 id="searchTitle">Que recherchez-vous ?</h2>
+      <label class="sr-only" for="searchInput">Rechercher un produit</label>
+      <input type="search" id="searchInput" placeholder="Ex. air fryer, hachoir, ceinture..." autocomplete="off">
+      <div id="searchResults" class="search-results" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <script src="data/config.js"></script>
+  <script src="data/products.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

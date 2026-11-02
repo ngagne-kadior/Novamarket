@@ -13,10 +13,11 @@ dépôt GitHub `ngagne-kadior/Novamarket`. Le README.md détaille l'usage côté
 ## Fichiers
 | Fichier | Rôle |
 |---|---|
-| `data/config.js` | **Configuration centrale** : `WHATSAPP_NUMBER`, `DELIVERY_INFO`, `SOCIAL_LINKS`, `PAGE_LINKS`. Fichier public : aucune donnée interne (coûts, marges). |
+| `data/config.js` | **Configuration centrale** : `WHATSAPP_NUMBER`, `DELIVERY_INFO`, `SOCIAL_LINKS` (Instagram, Facebook, TikTok renseignés). Fichier public : aucune donnée interne (coûts, marges). |
 | `data/products.js` | Données : `CATEGORIES`, `RETIRED_CATEGORIES`, `products` (format documenté en commentaire en tête du fichier). |
 | `script.js` | Code commun : utilitaires, liens WhatsApp, cartes produit, stock, panier (localStorage), menu, recherche, accueil. |
-| `index.html` | Accueil (ancres `#accueil`, `#categories`, `#produits`, `#inspiration`, `#apropos`, `#contact`). |
+| `index.html` | Accueil (ancres `#accueil`, `#categories`, `#produits`, `#commander` (« Comment commander » en 3 étapes), `#apropos` (résumé), `#contact`). |
+| `apropos.html` | Page À propos : textes « Notre histoire » et « Notre promesse » fournis par le propriétaire, à reprendre mot pour mot (aucun fait ajouté). |
 | `produits.html` + `produits.js` | Catalogue : filtre, recherche, tri, état dans l'URL (`?cat=&q=&tri=`). |
 | `categorie.html` + `categorie.js` | Page catégorie (`?cat=bien-etre`). |
 | `produit.html` + `produit.js` | Fiche produit (`?id=1`) : galerie, zoom, vidéo, favoris, quantité, commande. |
@@ -45,7 +46,8 @@ dépôt GitHub `ngagne-kadior/Novamarket`. Le README.md détaille l'usage côté
   Produits masqués/épuisés exclus du total et du message. Le panier n'est pas vidé après ouverture de WhatsApp.
   Nom/quartier/précisions jamais enregistrés.
 - `price: null` ⇒ « Prix sur demande ». `oldPrice`, `stock`, `tag` : uniquement si l'information est confirmée.
-- Pied de page : un lien social ou une page (Livraison, FAQ) vide dans la configuration n'est pas affiché.
+- Pied de page : liens sociaux avec icône, nouvel onglet et aria-label ; un réseau vide dans la configuration n'est pas affiché.
+  Pas de liens Inspiration, Livraison ni FAQ (retirés à la demande du propriétaire).
 
 ## Conventions
 - Tout le texte visible en français ; prix formatés par `formatPrice()` (« 35 000 FCFA »).
@@ -69,5 +71,5 @@ dépôt GitHub `ngagne-kadior/Novamarket`. Le README.md détaille l'usage côté
 - Fichiers volontairement **hors dépôt** (ne pas ajouter) : `friteuse air/4-*.webp`, `robot hachoir elect/1.webp` et `4.webp`,
   `lime-electrique-pieds/Lime 1.png`, `lime 2.png`, `lime 3.png`, `lime 4.png` (promesse avant/après), `video.jpeg` (autre modèle).
 - Pull request `refonte-identite` → `main` à valider sur GitHub ; numéro WhatsApp à tester depuis un téléphone.
-- À compléter quand c'est confirmé : caractéristiques de la ceinture, du hachoir et de la lime, comptes sociaux,
-  pages Livraison et FAQ, produits Électronique.
+- À compléter quand c'est confirmé : caractéristiques de la ceinture, du hachoir et de la lime,
+  produits Électronique.
