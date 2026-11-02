@@ -350,6 +350,7 @@ document.querySelectorAll("[data-social]").forEach(link => {
     link.href = url;
     link.target = "_blank";
     link.rel = "noopener";
+    link.setAttribute("aria-label", `NovaMarket sur ${link.textContent.trim()} (s'ouvre dans un nouvel onglet)`);
   } else {
     link.remove();
   }
@@ -361,13 +362,6 @@ document.querySelectorAll(".footer-social").forEach(column => {
     column.parentElement.classList.add("no-social");
     column.remove();
   }
-});
-
-// Pages d'information (pied de page) : lien affiché seulement si la page est renseignée dans PAGE_LINKS.
-document.querySelectorAll("[data-page-link]").forEach(link => {
-  const url = PAGE_LINKS[link.dataset.pageLink];
-  if (url) link.href = url;
-  else link.remove();
 });
 
 // Zone de livraison (data/config.js) : affichée seulement si elle est renseignée.

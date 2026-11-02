@@ -8,6 +8,7 @@ Site vitrine e-commerce NovaMarket — « L’innovation au service de votre quo
 - `produits.html` + `produits.js` : catalogue complet — recherche, filtre par catégorie, tri (`produits.html?cat=bien-etre&q=...&tri=price-asc`)
 - `categorie.html` + `categorie.js` : page d'une catégorie avec bannière, description et produits (`categorie.html?cat=bien-etre`)
 - `produit.html` + `produit.js` : fiche produit — prix, promotion (si configurée), disponibilité, caractéristiques, quantité, « Ajouter au panier », commande directe sur WhatsApp, produits similaires (`produit.html?id=1`)
+- `apropos.html` : page À propos (histoire, promesse, catégories proposées), liée depuis le menu et le pied de page
 - `panier.html` + `panier.js` : panier multi-produits — quantités, retrait, total des articles, envoi d'une seule demande de commande sur WhatsApp
 - `data/config.js` : **configuration de la boutique** — numéro WhatsApp (`WHATSAPP_NUMBER`), livraison (`DELIVERY_INFO`), réseaux sociaux (`SOCIAL_LINKS`). Fichier public : n'y mettre aucune donnée interne (coûts, marges).
 - `data/products.js` : **données centralisées** — catégories, produits
@@ -49,7 +50,7 @@ Les liens des 3 catégories du menu et du pied de page sont écrits en dur dans 
 
 1. Ouvrir ce dossier dans VS Code.
 2. Ouvrir `index.html` avec Live Server ou simplement dans un navigateur.
-3. Le numéro officiel est défini dans `data/config.js` (`WHATSAPP_NUMBER`, chiffres uniquement, indicatif pays compris) : c'est le seul endroit à modifier. **S'il est vidé, tous les boutons de commande WhatsApp sont désactivés** et affichent « WhatsApp bientôt disponible ». Renseigner aussi les URL de `SOCIAL_LINKS` (Instagram, Facebook, TikTok) et de `PAGE_LINKS` (Livraison, FAQ) ; un lien laissé vide n'est pas affiché.
+3. Le numéro officiel est défini dans `data/config.js` (`WHATSAPP_NUMBER`, chiffres uniquement, indicatif pays compris) : c'est le seul endroit à modifier. **S'il est vidé, tous les boutons de commande WhatsApp sont désactivés** et affichent « WhatsApp bientôt disponible ». Les URL de `SOCIAL_LINKS` (Instagram, Facebook, TikTok) sont renseignées dans le même fichier ; un réseau laissé vide n'est pas affiché.
 
 ## Ajouter ou modifier un produit
 
@@ -78,7 +79,6 @@ Les filtres, le catalogue, la recherche et les fiches produit se mettent à jour
 - Relire les descriptions et caractéristiques des produits (textes génériques à adapter).
 - Ajouter `oldPrice` / `stock` uniquement pour les promotions et disponibilités confirmées.
 - Pas d’avis clients affichés : à ajouter uniquement quand de vrais avis existeront.
-- Créer les pages Livraison et FAQ puis renseigner `PAGE_LINKS`, et renseigner `SOCIAL_LINKS` : ces liens restent masqués dans le pied de page tant qu'ils sont vides.
 
 ## Prochaine étape avec Claude dans VS Code
 
